@@ -1,38 +1,32 @@
-import {Body, Controller, Get, Param, Patch, Post, Request, UseGuards} from '@nestjs/common';
-import {OrdersService} from './orders.service';
-import {JwtAuthGuard} from '../auth/jwt-auth.guard';
-import {Roles} from '../auth/roles.decorator';
-import {RolesGuard} from '../auth/roles.guard';
-import {CreateOrderDto} from './dto/create-order.dto';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { ReservationsService } from './orders.service';
+import { CreateReservationDto } from './dto/create-order.dto';
+import { Reservation } from './entities/reservation.entity';
+import { ReservationStatus } from './enums/reservation-statuts.enum';
 
-@Controller('orders')
-export class OrdersController {
-    constructor(private readonly ordersService: OrdersService) {
-    }
+@Controller('reservations')
+export class ReservationsController {
+  constructor(private readonly service: ReservationsService) {}
 
-    @UseGuards(JwtAuthGuard)
-    @Post()
-    create(@Request() req, @Body() dto: CreateOrderDto) {
-        return this.ordersService.create(req.user.userId, dto);
-    }
+  @Get()
+  getAll(@Query('userId') userId?: number): Promise<Reservation[]> {
+    return userId ? this.service.findByUser(userId) : this.service.findAll();
+  }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('admin')
-    @Get('active')
-    findActive() {
-        return this.ordersService.findActive();
-    }
+  @Get(':id')
+  getOne(@Param('id') id: string): Promise<Reservation> {
+    return this.service.findOne(+id);
+  }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('admin')
-    @Patch(':id/confirm-pickup')
-    confirm(@Param('id') id: string) {
-        return this.ordersService.confirmPickup(+id);
-    }
+  @Post()
+  create(@Body() dto: CreateReservationDto): Promise<Reservation> {
+    console.log('POST /reservations received:', dto);
 
-    @UseGuards(JwtAuthGuard)
-    @Get(':id/qr-code')
-    findQr(@Param('id') id: string) {
-        return this.ordersService.findQr(+id);
-    }
+    return this.service.create(dto);
+  }
+
+  @Patch(':id/status')
+  updateStatus(@Param('id') id: string, @Body() body: { status: ReservationStatus }): Promise<Reservation> {
+    return this.service.updateStatus(+id, body.status);
+  }
 }

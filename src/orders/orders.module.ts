@@ -1,16 +1,16 @@
-import {Module} from '@nestjs/common';
-import {TypeOrmModule} from '@nestjs/typeorm';
-import {OrdersService} from './orders.service';
-import {OrdersController} from './orders.controller';
-import {Order} from './entities/order.entity';
-import {OrderItem} from './entities/order-item.entity';
-import {QrCodeFactory} from '../shared/factories/qr-code.factory';
-import {UsersModule} from '../users/users.module';
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ReservationsService } from './orders.service';
+import { ReservationsController } from './orders.controller';
+import { Reservation } from './entities/reservation.entity';
+import { OrderItem } from './entities/order-item.entity';
+import { User } from '../users/entities/user.entity';
+import { Product } from 'src/products/entities/product.entity';
+import { ProductsModule } from 'src/products/products.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Order, OrderItem]), UsersModule],
-    providers: [OrdersService, QrCodeFactory],
-    controllers: [OrdersController],
+  imports: [TypeOrmModule.forFeature([Reservation, OrderItem, User,Product]), ProductsModule],
+  providers: [ReservationsService],
+  controllers: [ReservationsController],
 })
-export class OrdersModule {
-}
+export class ReservationsModule {}

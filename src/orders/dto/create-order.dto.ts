@@ -1,20 +1,27 @@
-import {IsArray, IsNumber, ValidateNested} from 'class-validator';
-import {Type} from 'class-transformer';
+import { IsArray, IsDateString, IsEnum,  IsInt, IsNotEmpty, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ReservationStatus } from '../enums/reservation-statuts.enum';
 
-class OrderItemDto {
-    @IsNumber()
-    productId: number;
+export class OrderItemDTO {
+  @IsInt()
+  productId: number;
 
-    @IsNumber()
-    quantity: number;
+  @IsInt()
+  quantity: number;
 }
 
-export class CreateOrderDto {
-    @IsArray()
-    @ValidateNested({each: true})
-    @Type(() => OrderItemDto)
-    items: OrderItemDto[];
+export class CreateReservationDto {
+  @IsDateString()
+  date: string;
 
-    @IsNumber()
-    total: number;
+  @IsEnum(ReservationStatus)
+  status: ReservationStatus;
+
+  @IsInt()
+  userId: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OrderItemDTO)
+  products: OrderItemDTO[];
 }

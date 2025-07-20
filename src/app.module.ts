@@ -4,7 +4,7 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import {AuthModule} from './auth/auth.module';
 import {UsersModule} from './users/users.module';
 import {ProductsModule} from './products/products.module';
-import {OrdersModule} from './orders/orders.module';
+import {ReservationsModule} from './orders/orders.module';
 
 @Module({
     imports: [
@@ -20,13 +20,14 @@ import {OrdersModule} from './orders/orders.module';
                 database: cfg.get('DB_NAME'),
                 entities: [__dirname + '/**/*.entity{.ts,.js}'],
                 synchronize: true,
+                autoLoadEntities: true,
             }),
             inject: [ConfigService],
         }),
         AuthModule,
         UsersModule,
         ProductsModule,
-        OrdersModule,
+        ReservationsModule,
     ],
 })
 export class AppModule {

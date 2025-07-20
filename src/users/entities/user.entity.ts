@@ -1,23 +1,40 @@
-import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
-import {Order} from '../../orders/entities/order.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Exclude } from 'class-transformer';
+import { Reservation } from '../../orders/entities/reservation.entity';
+
+export enum UserRole {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+}
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({unique: true})
-    email: string;
+  @Column()
+  firstName: string;
 
-    @Column()
-    password: string;
+  @Column()
+  lastName: string;
 
-    @Column()
-    name: string;
+  @Column()
+  address: string;
 
-    @Column({default: 'user'})
-    role: string;
+  @Column({ unique: true })
+  email: string;
 
-    @OneToMany(() => Order, (order) => order.user)
-    orders: Order[];
+  @Column()
+  @Exclude()
+  password: string;
+
+  @Column({nullable: true} )
+  phoneNumber: string;
+
+  @OneToMany(() => Reservation, reservation => reservation.user)
+  reservations: Reservation[];
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  role: UserRole;
+  
 }

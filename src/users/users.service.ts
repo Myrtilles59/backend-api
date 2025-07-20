@@ -1,24 +1,39 @@
-import {Injectable} from '@nestjs/common';
-import {Repository} from 'typeorm';
-import {User} from './entities/user.entity';
-import {InjectRepository} from '@nestjs/typeorm';
-import {CreateUserDto} from './dto/create-user.dto';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class UsersService {
-    constructor(@InjectRepository(User) private repo: Repository<User>) {
-    }
+export class UserService {
+  constructor(
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+  ) {}
 
-    create(dto: CreateUserDto) {
-        const user = this.repo.create(dto);
-        return this.repo.save(user);
-    }
+  async create(dto: CreateUserDto): Promise<User> {
+    const user = this.userRepo.create({
+      ...dto,
+      password: await bcrypt.hash(dto.password, 10),
+    });
+    return this.userRepo.save(user);
+  }
 
-    findByEmail(email: string) {
-        return this.repo.findOne({where: {email}});
-    }
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { email } });
+  }
 
-    findById(id: number) {
-        return this.repo.findOne({where: {id}});
-    }
+  async findById(id: number): Promise<User | null> {
+    return this.userRepo.findOne({ where: { id } });
+  }
+
+  async update(id: number, updates: Partial<CreateUserDto>): Promise<boolean> {
+    await this.userRepo.update(id, updates);
+    return true;
+  }
+
+  async findAll(): Promise<User[]> {
+    return this.userRepo.find();
+  }
 }
