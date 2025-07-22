@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { UpdateProfileDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -13,9 +14,12 @@ export class UserService {
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
+    const password = await bcrypt.hash(dto.password, 1)
+    
+
     const user = this.userRepo.create({
       ...dto,
-      password: await bcrypt.hash(dto.password, 10),
+      password: password,
     });
     return this.userRepo.save(user);
   }
@@ -28,10 +32,23 @@ export class UserService {
     return this.userRepo.findOne({ where: { id } });
   }
 
-  async update(id: number, updates: Partial<CreateUserDto>): Promise<boolean> {
-    await this.userRepo.update(id, updates);
-    return true;
+async updateUser(id: number, dto: UpdateProfileDto): Promise<User> {
+  const user = await this.userRepo.findOneByOrFail({ id });
+
+  user.firstName = dto.firstName!!;
+  user.lastName = dto.lastName!!;
+  user.address = dto.address!!;
+  user.email = dto.email!!;
+  user.phoneNumber = dto.phoneNumber!!;
+  user.role = dto.role!!;
+
+  if (dto.password && dto.password != user.password && dto.password.trim() !== '') {
+    user.password = await bcrypt.hash(dto.password, 10);
   }
+  return this.userRepo.save(user);
+
+}
+  
 
   async findAll(): Promise<User[]> {
     return this.userRepo.find();

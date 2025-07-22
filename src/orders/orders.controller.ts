@@ -20,7 +20,6 @@ export class ReservationsController {
 
   @Post()
   create(@Body() dto: CreateReservationDto): Promise<Reservation> {
-    console.log('POST /reservations received:', dto);
 
     return this.service.create(dto);
   }
