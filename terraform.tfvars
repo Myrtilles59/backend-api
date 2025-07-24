@@ -1,0 +1,6 @@
+key_name        = "myrtilles-key"
+public_key_path = "/Users/h.ilarraz/.ssh/myrtilles.pub"
+instance_type   = "t3.micro"
+db_user         = "postgres"
+db_password     = "mysuperpassword"
+db_name         = "boulangerie"
