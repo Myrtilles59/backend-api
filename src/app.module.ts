@@ -19,6 +19,12 @@ import {ReservationsModule} from './orders/orders.module';
                 password: cfg.get('DB_PASS'),
                 database: cfg.get('DB_NAME'),
                 entities: [__dirname + '/**/*.entity{.ts,.js}'],
+                ssl: true,
+                extra: {
+                    ssl: {
+                        rejectUnauthorized: false
+                    }
+                },
                 synchronize: true,
                 autoLoadEntities: true,
             }),
