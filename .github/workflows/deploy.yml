@@ -1,0 +1,55 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy on EC2 via SSH
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+      - name: Connect to EC2 and deploy
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+            set -e
+
+            cd backend-api || {
+              echo "Clonage du dépôt"
+              git clone https://github.com/Myrtilles59/backend-api.git
+              cd backend-api
+            }
+
+            echo "Mise à jour du code"
+            git pull origin main
+
+            echo "Recréation du .env"
+            cat <<EOT > .env
+            DB_HOST=${DB_HOST}
+            DB_PORT=5432
+            DB_USER=postgres
+            DB_PASS=mysuperpassword
+            DB_NAME=boulangerie
+            JWT_SECRET=mysuperpassword
+            EOT
+
+            echo "Build et déploiement"
+            docker stop myrtilles-api || true
+            docker rm myrtilles-api || true
+            docker build -t myrtilles-api .
+            docker run -d --name myrtilles-api -p 3000:3000 --env-file .env myrtilles-api
+          EOF
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
